@@ -1,4 +1,6 @@
 class Wallet < ApplicationRecord
+  # polymorphic relations is more reasonable here instead of STI
+  belongs_to :owner, polymorphic: true
   # related transactions where the wallet are the receiver
   has_many :outgoing_transactions, class_name: "Transaction", foreign_key: :source_wallet_id
   # related data where current wallet are the sender
@@ -12,7 +14,11 @@ class Wallet < ApplicationRecord
     raise "Insufficient funds" if balance < amount
 
     ActiveRecord::Base.transaction do
-      Transaction.create!(source_wallet: self, target_wallet: target_wallet, amount: amount)
+      TransferTransaction.create!(
+        source_wallet: self,
+        target_wallet: target_wallet,
+        amount: amount
+      )
     end
   end
 
@@ -21,7 +27,15 @@ class Wallet < ApplicationRecord
     ActiveRecord::Base.transaction do
       # set source wallet as nil since it was not clear where and how (user, team and stock could be deposit) it could
       # form direct bank account or others thrid-party wallet service
-      Transaction.create!(source_wallet: nil, target_wallet: self, amount: amount)
+      # Transaction.create!(source_wallet: nil, target_wallet: self, amount: amount)
+      DepositTransaction.create!(target_wallet: self, amount: amount)
+    end
+  end
+
+  # same conditions as deposit
+  def withdraw(amount)
+    ActiveRecord::Base.transaction do
+      Transaction.create!(source_wallet: self, target_wallet: nil, amount: amount)
     end
   end
 end
