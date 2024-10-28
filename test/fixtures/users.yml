@@ -1,9 +1,7 @@
-# Read about fixtures at https://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
-
 one:
-  username: MyString
-  password_digest: MyString
+  email: "admin@mail.com"
+  password_digest: <%= User.new(password: 'password').send(:hmac_password, 'password') %>
 
 two:
-  username: MyString
-  password_digest: MyString
+  email: "user2@mail.com"
+  password_digest: <%= User.new(password: 'password').send(:hmac_password, 'password') %>

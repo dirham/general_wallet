@@ -15,6 +15,10 @@ class User < ApplicationRecord
     hmac_password(input_password) == self.password_digest
   end
 
+  def safe_attributes
+    attributes.except("password_digest")
+  end
+
   private
 
   def hmac_password(password)

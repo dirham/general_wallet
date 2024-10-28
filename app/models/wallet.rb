@@ -27,15 +27,14 @@ class Wallet < ApplicationRecord
     ActiveRecord::Base.transaction do
       # set source wallet as nil since it was not clear where and how (user, team and stock could be deposit) it could
       # form direct bank account or others thrid-party wallet service
-      # Transaction.create!(source_wallet: nil, target_wallet: self, amount: amount)
       DepositTransaction.create!(target_wallet: self, amount: amount)
     end
   end
 
-  # same conditions as deposit
   def withdraw(amount)
+    raise "Insufficient funds" if balance < amount
     ActiveRecord::Base.transaction do
-      Transaction.create!(source_wallet: self, target_wallet: nil, amount: amount)
+      WithdrawTransaction.create!(source_wallet: self, amount: amount)
     end
   end
 end
